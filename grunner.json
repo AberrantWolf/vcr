@@ -1,0 +1,10 @@
+{
+    "actions": {
+        "Test": {
+            "execute": "echo \"Hello World\""
+        },
+        "List": {
+            "execute": "ls"
+        }
+    }
+}
