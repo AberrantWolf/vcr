@@ -3,8 +3,14 @@
         "Test": {
             "execute": "echo \"Hello World\""
         },
+        "Beta": {
+            "execute": "echo \"betaaaaaaa!\""
+        },
         "List": {
             "execute": "ls"
+        },
+        "Awesome Build Step": {
+            "execute": "cmake"
         }
     }
 }
