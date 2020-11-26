@@ -1,5 +1,6 @@
 mod command_actions;
 mod grui;
+mod task_subscription;
 
 use command_actions::{load_grunner_config, CommandAction};
 
