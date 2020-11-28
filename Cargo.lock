@@ -146,12 +146,32 @@ name = "bytemuck"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "41aa2ec95ca3b5c54cf73c91acf06d24f4495d5f1b1c12506ae3483d646177ac"
+dependencies = [
+ "bytemuck_derive",
+]
+
+[[package]]
+name = "bytemuck_derive"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e215f8c2f9f79cb53c8335e687ffd07d5bfcb6fe5fc80723762d0be46e7cc54"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "byteorder"
 version = "1.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08c48aae112d48ed9f069b33538ea9e3e90aa263cfa3d1c24309612b1f7472de"
+
+[[package]]
+name = "bytes"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0dcbc35f504eb6fc275a6d20e4ebcda18cf50d40ba6fabff8c711fa16cb3b16"
 
 [[package]]
 name = "calloop"
@@ -575,9 +595,9 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "dwrote"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcdf488e3a52a7aa30a05732a3e58420e22acb4b2b75635a561fc6ffbcab59ef"
+checksum = "439a1c2ba5611ad3ed731280541d36d2e9c4ac5e7fb818a27b604bdc5a6aa65b"
 dependencies = [
  "lazy_static",
  "libc",
@@ -634,9 +654,9 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "font-kit"
-version = "0.6.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f953474ebbe3460775ed2da52435477cc029493284d6ceb635598586a2c6298"
+checksum = "4c04f5c358473b358c4bb8e5c72f1a25f51d4ca6ad76b2261e1f3b81937faae7"
 dependencies = [
  "bitflags",
  "byteorder",
@@ -972,9 +992,12 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.9.5"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8637c7ec4fd0776c51eeab3e0d5d1aa7e440ece3fc2ee7d674e13c957287bfc1"
+checksum = "579160312273c954cc51bd440f059dde741029ac8daf8c84fece76cb77f62c15"
+dependencies = [
+ "version_check",
+]
 
 [[package]]
 name = "glyph_brush"
@@ -1020,8 +1043,8 @@ name = "grunner"
 version = "0.1.0"
 dependencies = [
  "iced",
- "iced_futures 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "iced_native 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "iced_futures",
+ "iced_native",
  "serde",
  "serde_json",
  "structopt",
@@ -1059,11 +1082,12 @@ dependencies = [
 
 [[package]]
 name = "iced"
-version = "0.1.1"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc8b909824aae021b8e6598ea3f021200d6bea10d27ae1b4202f678c68b0eed9"
 dependencies = [
- "iced_core 0.2.1 (git+https://github.com/hecrj/iced)",
- "iced_futures 0.1.2 (git+https://github.com/hecrj/iced)",
+ "iced_core",
+ "iced_futures",
  "iced_web",
  "iced_wgpu",
  "iced_winit",
@@ -1072,30 +1096,15 @@ dependencies = [
 
 [[package]]
 name = "iced_core"
-version = "0.2.1"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
-
-[[package]]
-name = "iced_core"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c109c49f00169139cdd57afac6c8a80346fc60fc5743b4ba6a4cfdf1285c2dd"
+checksum = "c1594f842b6d05b38a1432ed0b9fa8d237d6395a3b9d0fefcc28c61e57eba3a5"
 
 [[package]]
 name = "iced_futures"
-version = "0.1.2"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
-dependencies = [
- "futures",
- "log",
- "wasm-bindgen-futures",
-]
-
-[[package]]
-name = "iced_futures"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd2d8494c0b2a1e1977421b4c094fdcd32d79c27fb9b3bbf1021c62de9eb6986"
+checksum = "5f6310f02cfb482bb58a1ff6d000c654eff9975762a60f7fad8d821caf45562e"
 dependencies = [
  "futures",
  "log",
@@ -1105,12 +1114,13 @@ dependencies = [
 [[package]]
 name = "iced_graphics"
 version = "0.1.0"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7de74358f3c950421151765bcf04ce665af538e340e55aff78d2c88c343c7deb"
 dependencies = [
  "bytemuck",
  "font-kit",
  "glam",
- "iced_native 0.2.2 (git+https://github.com/hecrj/iced)",
+ "iced_native",
  "iced_style",
  "raw-window-handle",
  "thiserror",
@@ -1118,45 +1128,35 @@ dependencies = [
 
 [[package]]
 name = "iced_native"
-version = "0.2.2"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d608742afa42d27ce2ea34746d8694e0ad434b50cad7484008a9460b521853c"
 dependencies = [
- "iced_core 0.2.1 (git+https://github.com/hecrj/iced)",
- "iced_futures 0.1.2 (git+https://github.com/hecrj/iced)",
+ "iced_core",
+ "iced_futures",
  "num-traits",
  "twox-hash",
  "unicode-segmentation",
 ]
 
 [[package]]
-name = "iced_native"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "206e519650f28fd94dcd1004a20b6ccef989d3c4d12160832377c94ac837c93c"
-dependencies = [
- "iced_core 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "iced_futures 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "raw-window-handle",
- "twox-hash",
- "unicode-segmentation",
-]
-
-[[package]]
 name = "iced_style"
-version = "0.1.0"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0eb4fb0cc5d646b3f7a459aee712e99c847c5c9acd23130dcf250556d9b1d16"
 dependencies = [
- "iced_core 0.2.1 (git+https://github.com/hecrj/iced)",
+ "iced_core",
 ]
 
 [[package]]
 name = "iced_web"
-version = "0.2.1"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c5310185411940a4f3edfd26ff1763fa5e517256a55a83eea28d7e4d19e9c27"
 dependencies = [
  "dodrio",
- "iced_core 0.2.1 (git+https://github.com/hecrj/iced)",
- "iced_futures 0.1.2 (git+https://github.com/hecrj/iced)",
+ "iced_core",
+ "iced_futures",
  "iced_style",
  "num-traits",
  "url",
@@ -1167,30 +1167,31 @@ dependencies = [
 
 [[package]]
 name = "iced_wgpu"
-version = "0.2.2"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d148b650cb56cdbdd6dbdfd14fabc06e6f236232d59e8a776ca4e3e9cfdcc25"
 dependencies = [
  "bytemuck",
  "futures",
  "glyph_brush",
  "guillotiere",
  "iced_graphics",
- "iced_native 0.2.2 (git+https://github.com/hecrj/iced)",
+ "iced_native",
  "log",
  "raw-window-handle",
  "wgpu",
  "wgpu_glyph",
- "zerocopy",
 ]
 
 [[package]]
 name = "iced_winit"
-version = "0.1.1"
-source = "git+https://github.com/hecrj/iced#da1a3eed1e6e67c2c0507e3b939e4aacdc06c19a"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c99c7a351c32676ef2f46be25dcc490fcc6bd33a6847050534191d13b6b532f4"
 dependencies = [
- "iced_futures 0.1.2 (git+https://github.com/hecrj/iced)",
+ "iced_futures",
  "iced_graphics",
- "iced_native 0.2.2 (git+https://github.com/hecrj/iced)",
+ "iced_native",
  "log",
  "thiserror",
  "winapi 0.3.9",
@@ -1410,10 +1411,23 @@ dependencies = [
  "kernel32-sys",
  "libc",
  "log",
- "miow",
+ "miow 0.2.1",
  "net2",
  "slab",
  "winapi 0.2.8",
+]
+
+[[package]]
+name = "mio"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f33bc887064ef1fd66020c9adfc45bb9f33d75a42096c81e7c56c65b75dd1a8b"
+dependencies = [
+ "libc",
+ "log",
+ "miow 0.3.6",
+ "ntapi",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1424,7 +1438,7 @@ checksum = "52403fe290012ce777c4626790c8951324a2b9e3316b3143779c72b029742f19"
 dependencies = [
  "lazycell",
  "log",
- "mio",
+ "mio 0.6.22",
  "slab",
 ]
 
@@ -1438,6 +1452,16 @@ dependencies = [
  "net2",
  "winapi 0.2.8",
  "ws2_32-sys",
+]
+
+[[package]]
+name = "miow"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a33c1b55807fbed163481b5ba66db4b2fa6cde694a5027be10fb724206c5897"
+dependencies = [
+ "socket2",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -1530,6 +1554,15 @@ checksum = "ffb4262d26ed83a1c0a33a38fe2bb15797329c85770da05e6b828ddb782627af"
 dependencies = [
  "memchr",
  "version_check",
+]
+
+[[package]]
+name = "ntapi"
+version = "0.3.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f6bb902e437b6d86e03cce10a7e2af662292c5dfef23b65899ea3ac9354ad44"
+dependencies = [
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -2043,6 +2076,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "signal-hook-registry"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce32ea0c6c56d5eacaeb814fbed9960547021d3edd010ded1425f180536b20ab"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "slab"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2082,6 +2124,18 @@ checksum = "6e0eec3480d929e276b38424c8849575ee1e50003eae1cbdc93ee653147acc42"
 dependencies = [
  "smithay-client-toolkit",
  "wayland-client",
+]
+
+[[package]]
+name = "socket2"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2c29947abdee2a218277abeca306f25789c938e500ea5a9d4b12a5a504466902"
+dependencies = [
+ "cfg-if 1.0.0",
+ "libc",
+ "redox_syscall",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -2249,7 +2303,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5ca08accbcb46f11fd8d2d1c6158c348b7888009a1f39260bcad66f6a454250"
 dependencies = [
  "autocfg",
+ "bytes",
+ "lazy_static",
+ "libc",
+ "mio 0.7.6",
  "pin-project-lite",
+ "signal-hook-registry",
+ "winapi 0.3.9",
 ]
 
 [[package]]
@@ -2679,7 +2739,7 @@ dependencies = [
  "lazy_static",
  "libc",
  "log",
- "mio",
+ "mio 0.6.22",
  "mio-extras",
  "ndk",
  "ndk-glue",
