@@ -1,16 +1,15 @@
 {
     "actions": {
         "Test": {
-            "execute": "echo \"Hello World\""
+            "execute": "powershell",
+            "args": ["echo hello"]
         },
         "Beta": {
             "execute": "echo \"betaaaaaaa!\""
         },
-        "List": {
-            "execute": "ls"
-        },
-        "Awesome Build Step": {
-            "execute": "cmake"
+        "Build Myself": {
+            "execute": "powershell",
+            "args": ["cargo build"]
         }
     }
 }

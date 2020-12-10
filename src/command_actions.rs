@@ -4,9 +4,15 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CommandAction {
     pub execute: String,
+
+    #[serde(default)]
+    pub args: Vec<String>,
+
+    #[serde(skip)]
+    pub gui_state: iced::button::State,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
