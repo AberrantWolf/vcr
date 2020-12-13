@@ -7,25 +7,25 @@ use tokio::{
     process::{Child, ChildStdout, Command},
 };
 
-use crate::command_actions::CommandAction;
+use crate::command_actions::GrunnerAction;
 
-pub fn build_subscription(action: &CommandAction) -> iced::Subscription<ActionProgress> {
+pub fn build_subscription(action: &GrunnerAction) -> iced::Subscription<ActionProgress> {
     iced::Subscription::from_recipe(DoAction {
         action: action.clone(),
     })
 }
 
 pub struct DoAction {
-    action: CommandAction,
+    action: GrunnerAction,
 }
 
 pub enum ActionState {
-    Ready(CommandAction),
+    Ready(GrunnerAction),
     InProgress(
         BufReader<ChildStdout>,
         BufReader<ChildStderr>,
         Child,
-        CommandAction,
+        GrunnerAction,
     ),
     Done,
 }
@@ -38,7 +38,7 @@ pub enum ActionProgress {
     Error,
 }
 
-fn run_async_process(action: &CommandAction) -> (ChildStdout, ChildStderr, Child) {
+fn run_async_process(action: &GrunnerAction) -> (ChildStdout, ChildStderr, Child) {
     let mut proc = Command::new(action.execute.clone())
         .args(action.args.clone())
         .stdout(Stdio::piped())

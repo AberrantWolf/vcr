@@ -1,15 +1,26 @@
 {
-    "actions": {
-        "Test": {
-            "execute": "powershell",
-            "args": ["echo hello"]
-        },
-        "Beta": {
-            "execute": "echo \"betaaaaaaa!\""
-        },
-        "Build Myself": {
-            "execute": "powershell",
-            "args": ["cargo build"]
+    "sections":[
+        {
+            "label": "Cargo",
+            "options": {
+                "buildType": {"choices": [
+                    {"id": 0, "label": "Debug", "arg":"--debug"},
+                    {"id": 1, "label":"Release", "arg":"--release"}
+                ]},
+                "runTests": {"name": "Run Tests", "value": false, "arg": "--tests"}
+            },
+            "actions": {
+                "Build": {
+                    "execute": "cargo",
+                    "args": ["build"],
+                    "use_options":["buildType", "runTests"]
+                },
+                "Run": {
+                    "execute": "cargo",
+                    "args": ["run"],
+                    "use_options": ["buildType"]
+                }
+            }
         }
-    }
+    ]
 }

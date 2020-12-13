@@ -1,12 +1,13 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc, sync::Arc};
 
 use iced::{
     executor, Application, Button, Column, Command, Container, Element, Length, Settings,
     Subscription, Text,
 };
+use GruiMessage::ChoiceChanged;
 
-use crate::command_actions::GrunnerConfig;
-use crate::{command_actions::CommandAction, task_subscription};
+use crate::command_actions::{GrunnerConfig, GrunnerOption};
+use crate::{command_actions::GrunnerAction, task_subscription};
 
 pub fn run_grui(config: GrunnerConfig) {
     Grui::run(Settings::with_flags(config)).expect("Error running Grunner UI");
@@ -22,14 +23,15 @@ pub struct Grui {
 #[derive(Debug)]
 enum GState {
     Idle,
-    Working(CommandAction),
+    Working(GrunnerAction),
 }
 
 #[derive(Debug, Clone)]
 pub enum GruiMessage {
     Start,
-    StartAction(CommandAction),
+    StartAction(GrunnerAction),
     ActionUpdate(task_subscription::ActionProgress),
+    ChoiceChanged(usize),
 }
 
 impl Grui {
@@ -65,6 +67,7 @@ impl Application for Grui {
                 task_subscription::ActionProgress::Completed => self.state = GState::Idle,
                 task_subscription::ActionProgress::Error => self.state = GState::Idle,
             },
+            ChoiceChanged(_) => {}
         };
 
         Command::none()
@@ -84,26 +87,46 @@ impl Application for Grui {
 
         match self.state {
             GState::Idle => {
-                for (text, act) in self.config.actions.iter_mut() {
-                    let act_clone = act.clone();
-                    content = content.push(
-                        Button::new(&mut act.gui_state, Text::new(text))
-                            .on_press(GruiMessage::StartAction(act_clone)),
-                    );
+                for sect in self.config.sections.iter_mut() {
+                    // TODO: Draw a label and separator for this section
+
+                    for (label, opt) in sect.options.iter_mut() {
+                        match opt {
+                            GrunnerOption::Choices { choices, selected } => {
+                                for choice in choices.iter() {
+                                    content = content.push(iced::radio::Radio::new(
+                                        choice.id,
+                                        &choice.label,
+                                        selected.to_owned(),
+                                        GruiMessage::ChoiceChanged,
+                                    ));
+                                }
+                            }
+                            GrunnerOption::Flag { name, value, arg } => {}
+                        }
+                    }
+
+                    for (text, act) in sect.actions.iter_mut() {
+                        let act_clone = act.clone();
+                        content = content.push(
+                            Button::new(&mut act.gui_state, Text::new(text))
+                                .on_press(GruiMessage::StartAction(act_clone)),
+                        );
+                    }
                 }
-                // let column: Column<_> = self
-                //     .config
-                //     .actions
-                //     .iter()
-                //     .enumerate()
-                //     .fold(Column::new(), |column, (i, (text, act))| {
-                //         column.push(
-                //             Button::new(btn_state, Text::new(text))
-                //                 .on_press(GruiMessage::StartAction(act.clone())),
-                //         )
-                //     })
-                //     .into();
             }
+            // let column: Column<_> = self
+            //     .config
+            //     .actions
+            //     .iter()
+            //     .enumerate()
+            //     .fold(Column::new(), |column, (i, (text, act))| {
+            //         column.push(
+            //             Button::new(btn_state, Text::new(text))
+            //                 .on_press(GruiMessage::StartAction(act.clone())),
+            //         )
+            //     })
+            //     .into();
             GState::Working(_) => {
                 content = content.push(Text::new("Working..."));
             }
