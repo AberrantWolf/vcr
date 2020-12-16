@@ -67,7 +67,13 @@ impl Application for Grui {
                 task_subscription::ActionProgress::Completed => self.state = GState::Idle,
                 task_subscription::ActionProgress::Error => self.state = GState::Idle,
             },
-            ChoiceChanged(_) => {}
+            ChoiceChanged(opt_id) => {
+                for sect in &mut self.config.sections {
+                    for (_, opt) in &mut sect.options {
+                        if opt.try_set_option(&opt_id) {}
+                    }
+                }
+            }
         };
 
         Command::none()
@@ -90,10 +96,13 @@ impl Application for Grui {
                 for sect in self.config.sections.iter_mut() {
                     // TODO: Draw a label and separator for this section
 
-                    for (label, opt) in sect.options.iter_mut() {
+                    for (_section_label, opt) in sect.options.iter_mut() {
                         match opt {
                             GrunnerOption::Choices { choices, selected } => {
                                 for choice in choices.iter() {
+                                    if let None = selected {
+                                        *selected = Some(choice.id);
+                                    }
                                     content = content.push(iced::radio::Radio::new(
                                         choice.id,
                                         &choice.label,
@@ -102,7 +111,11 @@ impl Application for Grui {
                                     ));
                                 }
                             }
-                            GrunnerOption::Flag { name, value, arg } => {}
+                            GrunnerOption::Flag {
+                                name: _,
+                                value: _,
+                                arg: _,
+                            } => {}
                         }
                     }
 

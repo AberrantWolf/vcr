@@ -4,8 +4,8 @@
             "label": "Cargo",
             "options": {
                 "buildType": {"choices": [
-                    {"id": 0, "label": "Debug", "arg":"--debug"},
-                    {"id": 1, "label":"Release", "arg":"--release"}
+                    {"label": "Debug", "arg":"--debug"},
+                    {"label":"Release", "arg":"--release"}
                 ]},
                 "runTests": {"name": "Run Tests", "value": false, "arg": "--tests"}
             },

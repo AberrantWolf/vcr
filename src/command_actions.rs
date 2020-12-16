@@ -1,11 +1,22 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
+use std::cell::Cell;
 use std::io::Read;
 use std::{collections::HashMap, rc::Rc};
 use std::{fs::File, sync::Arc};
 
+thread_local!(static OPTION_ID: Cell<usize> = Cell::new(0));
+fn next_option_id() -> usize {
+    OPTION_ID.with(|id| {
+        let result = id.get();
+        id.set(result + 1);
+        result
+    })
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GrunnerChoiceType {
+    #[serde(skip, default = "next_option_id")]
     pub id: usize,
     pub label: String,
     pub arg: String,
@@ -25,6 +36,20 @@ pub enum GrunnerOption {
         value: bool,
         arg: String,
     },
+}
+
+impl GrunnerOption {
+    pub fn try_set_option(&mut self, option_id: &usize) -> bool {
+        if let GrunnerOption::Choices { choices, selected } = self {
+            for opt in choices {
+                if opt.id == *option_id {
+                    *selected = Some(*option_id);
+                    return true;
+                }
+            }
+        }
+        false
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
