@@ -7,7 +7,9 @@
                     {"label": "Debug", "arg":"--debug"},
                     {"label":"Release", "arg":"--release"}
                 ]},
-                "runTests": {"name": "Run Tests", "value": false, "arg": "--tests"}
+                "runTests": {"name": "Run Tests", "value": false, "arg": "--tests"},
+                
+                "moarOptions": {"name": "Some Flag", "value": true, "arg": "--a-flag"}
             },
             "actions": {
                 "Build": {

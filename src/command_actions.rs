@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use std::cell::Cell;
+use std::collections::HashMap;
+use std::fs::File;
 use std::io::Read;
-use std::{collections::HashMap, rc::Rc};
-use std::{fs::File, sync::Arc};
 
 thread_local!(static OPTION_ID: Cell<usize> = Cell::new(0));
 fn next_option_id() -> usize {

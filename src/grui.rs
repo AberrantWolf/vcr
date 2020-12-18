@@ -1,10 +1,9 @@
-use std::{collections::HashMap, rc::Rc, sync::Arc};
+use std::collections::HashMap;
 
 use iced::{
-    executor, Application, Button, Column, Command, Container, Element, Length, Settings,
+    executor, Application, Button, Column, Command, Container, Element, Length, Row, Settings,
     Subscription, Text,
 };
-use GruiMessage::ChoiceChanged;
 
 use crate::command_actions::{GrunnerConfig, GrunnerOption};
 use crate::{command_actions::GrunnerAction, task_subscription};
@@ -28,12 +27,85 @@ enum GState {
 
 #[derive(Debug, Clone)]
 pub enum GruiMessage {
-    Start,
+    _Start,
     StartAction(GrunnerAction),
     ActionUpdate(task_subscription::ActionProgress),
-    ChoiceChanged(usize),
+    OptionChanged(String, GrunnerOptionMessage),
 }
 
+#[derive(Debug, Clone)]
+pub enum GrunnerOptionMessage {
+    ChoiceChanged(usize),
+    FlagChanged(bool),
+}
+
+//------------------------------------------------------------------------------
+// impl GrunnerOption
+//------------------------------------------------------------------------------
+impl GrunnerOption {
+    fn update(&mut self, message: GrunnerOptionMessage) {
+        match message {
+            GrunnerOptionMessage::ChoiceChanged(id) => {
+                if let GrunnerOption::Choices {
+                    choices: _,
+                    selected,
+                } = self
+                {
+                    *selected = Some(id);
+                }
+            }
+            GrunnerOptionMessage::FlagChanged(val) => {
+                if let GrunnerOption::Flag {
+                    name: _,
+                    value,
+                    arg: _,
+                } = self
+                {
+                    *value = val;
+                }
+            }
+        }
+    }
+
+    fn view(&mut self) -> Element<GrunnerOptionMessage> {
+        // TODO: Flesh out (move/add as needed)
+        match self {
+            GrunnerOption::Choices { choices, selected } => {
+                let mut content = Row::new().spacing(8);
+                for choice in choices.iter() {
+                    // Check for unset option and then just select the first one
+                    // TODO: Include an optional default option and set that (somewhere) if it exists
+                    if let None = selected {
+                        *selected = Some(choice.id);
+                    }
+                    content = content.push(iced::radio::Radio::new(
+                        choice.id,
+                        &choice.label,
+                        selected.to_owned(),
+                        GrunnerOptionMessage::ChoiceChanged,
+                    ));
+                }
+                content.into()
+            }
+            GrunnerOption::Flag {
+                name,
+                value,
+                arg: _,
+            } => {
+                let content = iced::checkbox::Checkbox::new(
+                    *value,
+                    name.to_owned(),
+                    GrunnerOptionMessage::FlagChanged,
+                );
+                content.into()
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+// impl Grui
+//------------------------------------------------------------------------------
 impl Grui {
     fn new(config: GrunnerConfig) -> Self {
         Grui {
@@ -44,6 +116,9 @@ impl Grui {
     }
 }
 
+//------------------------------------------------------------------------------
+// impl Application for Grui
+//------------------------------------------------------------------------------
 impl Application for Grui {
     type Executor = executor::Default;
     type Message = GruiMessage;
@@ -58,8 +133,9 @@ impl Application for Grui {
     }
 
     fn update(&mut self, message: GruiMessage) -> Command<GruiMessage> {
+        // TODO: Change messages to refer to an index in the list of options and then forward
         match message {
-            GruiMessage::Start => {}
+            GruiMessage::_Start => {}
             GruiMessage::StartAction(act) => self.state = GState::Working(act),
             GruiMessage::ActionUpdate(update) => match update {
                 task_subscription::ActionProgress::Starting => {}
@@ -67,10 +143,15 @@ impl Application for Grui {
                 task_subscription::ActionProgress::Completed => self.state = GState::Idle,
                 task_subscription::ActionProgress::Error => self.state = GState::Idle,
             },
-            ChoiceChanged(opt_id) => {
-                for sect in &mut self.config.sections {
-                    for (_, opt) in &mut sect.options {
-                        if opt.try_set_option(&opt_id) {}
+            GruiMessage::OptionChanged(name, opt_message) => {
+                'top: for sect in &mut self.config.sections {
+                    for (opt_name, opt) in &mut sect.options {
+                        if *opt_name != name {
+                            continue;
+                        }
+
+                        opt.update(opt_message);
+                        break 'top;
                     }
                 }
             }
@@ -89,71 +170,46 @@ impl Application for Grui {
     }
 
     fn view(&mut self) -> Element<GruiMessage> {
-        let mut content = Column::new();
-
-        match self.state {
+        let content = match self.state {
             GState::Idle => {
-                for sect in self.config.sections.iter_mut() {
-                    // TODO: Draw a label and separator for this section
+                let sections: Element<_> = self
+                    .config
+                    .sections
+                    .iter_mut()
+                    .fold(Column::new().spacing(20), |content, section| {
+                        // TODO: Draw a label and separator for this section
 
-                    for (_section_label, opt) in sect.options.iter_mut() {
-                        match opt {
-                            GrunnerOption::Choices { choices, selected } => {
-                                for choice in choices.iter() {
-                                    if let None = selected {
-                                        *selected = Some(choice.id);
-                                    }
-                                    content = content.push(iced::radio::Radio::new(
-                                        choice.id,
-                                        &choice.label,
-                                        selected.to_owned(),
-                                        GruiMessage::ChoiceChanged,
-                                    ));
-                                }
-                            }
-                            GrunnerOption::Flag {
-                                name: _,
-                                value: _,
-                                arg: _,
-                            } => {}
-                        }
-                    }
+                        let options_gui: Element<_> = section
+                            .options
+                            .iter_mut()
+                            .fold(Column::new().spacing(8), |column, (opt_name, opt)| {
+                                let owned_name = opt_name.clone();
+                                column.push(opt.view().map(move |msg| {
+                                    GruiMessage::OptionChanged(owned_name.clone(), msg)
+                                }))
+                            })
+                            .into();
 
-                    for (text, act) in sect.actions.iter_mut() {
-                        let act_clone = act.clone();
-                        content = content.push(
-                            Button::new(&mut act.gui_state, Text::new(text))
-                                .on_press(GruiMessage::StartAction(act_clone)),
-                        );
-                    }
-                }
+                        let actions_gui: Element<_> = section
+                            .actions
+                            .iter_mut()
+                            .fold(Row::new().spacing(8), |content, (text, act)| {
+                                let act_clone = act.clone();
+                                content.push(
+                                    Button::new(&mut act.gui_state, Text::new(text))
+                                        .on_press(GruiMessage::StartAction(act_clone)),
+                                )
+                            })
+                            .into();
+
+                        content.push(options_gui).push(actions_gui)
+                    })
+                    .into();
+
+                sections
             }
-            // let column: Column<_> = self
-            //     .config
-            //     .actions
-            //     .iter()
-            //     .enumerate()
-            //     .fold(Column::new(), |column, (i, (text, act))| {
-            //         column.push(
-            //             Button::new(btn_state, Text::new(text))
-            //                 .on_press(GruiMessage::StartAction(act.clone())),
-            //         )
-            //     })
-            //     .into();
-            GState::Working(_) => {
-                content = content.push(Text::new("Working..."));
-            }
-        }
-        // let column: Column<_> = self
-        //     .config
-        //     .actions
-        //     .iter()
-        //     .enumerate()
-        //     .fold(Column::new(), |column, (i, (text, _act))| {
-        //         column.push(Text::new(text))
-        //     })
-        //     .into();
-
+            GState::Working(_) => Column::new().push(Text::new("Working...")).into(),
+        };
         Container::new(content)
             .width(Length::Fill)
             .height(Length::Fill)

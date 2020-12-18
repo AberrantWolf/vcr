@@ -105,7 +105,7 @@ where
                                     return Some((ActionProgress::Completed, ActionState::Done));
                                 }
 
-                                println!("Output: {}", &line);
+                                print!("Output: {}", &line);
 
                                 Some((
                                     ActionProgress::Continuing,
