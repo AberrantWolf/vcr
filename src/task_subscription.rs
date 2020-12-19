@@ -39,8 +39,12 @@ pub enum ActionProgress {
 }
 
 fn run_async_process(action: &GrunnerAction) -> (ChildStdout, ChildStderr, Child) {
+    println!("Running action...");
+    println!("-----------------");
+
     let mut proc = Command::new(action.execute.clone())
         .args(action.args.clone())
+        .args(action.options.clone())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .kill_on_drop(true)
@@ -101,11 +105,12 @@ where
                         match readline {
                             Ok(count_bytes) => {
                                 if count_bytes == 0 {
-                                    println!("Process succeeded!");
+                                    println!("-----------------");
+                                    println!("Action succeeded!\n");
                                     return Some((ActionProgress::Completed, ActionState::Done));
                                 }
 
-                                print!("Output: {}", &line);
+                                print!("{}", &line);
 
                                 Some((
                                     ActionProgress::Continuing,

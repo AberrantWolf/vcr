@@ -4,7 +4,7 @@
             "label": "Cargo",
             "options": {
                 "buildType": {"choices": [
-                    {"label": "Debug", "arg":"--debug"},
+                    {"label": "Debug", "arg":""},
                     {"label":"Release", "arg":"--release"}
                 ]},
                 "runTests": {"name": "Run Tests", "value": false, "arg": "--tests"},
@@ -21,6 +21,23 @@
                     "execute": "cargo",
                     "args": ["run"],
                     "use_options": ["buildType"]
+                }
+            }
+        },
+        {
+            "label": "Git",
+            "options": {
+                "command": {
+                    "choices": [
+                        {"label": "Status", "arg": "status"},
+                        {"label": "Pull", "arg": "pull"}
+                    ]
+                }
+            },
+            "actions": {
+                "Execute Git": {
+                    "execute": "git",
+                    "use_options": ["command"]
                 }
             }
         }

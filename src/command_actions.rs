@@ -39,16 +39,28 @@ pub enum GrunnerOption {
 }
 
 impl GrunnerOption {
-    pub fn try_set_option(&mut self, option_id: &usize) -> bool {
-        if let GrunnerOption::Choices { choices, selected } = self {
-            for opt in choices {
-                if opt.id == *option_id {
-                    *selected = Some(*option_id);
-                    return true;
+    pub fn get_arg(&self) -> Option<String> {
+        // println!("OPTION: {:?}", self);
+        match self {
+            GrunnerOption::Choices { choices, selected } => {
+                if let Some(idx) = selected {
+                    let choice = &choices[*idx].arg;
+                    if choice.is_empty() {
+                        None
+                    } else {
+                        Some(choice.into())
+                    }
+                } else {
+                    None
                 }
             }
+            GrunnerOption::Flag {
+                name: _,
+                value,
+                arg,
+            } if *value => Some(arg.into()),
+            _ => None,
         }
-        false
     }
 }
 
@@ -65,6 +77,12 @@ pub struct GrunnerAction {
 
     #[serde(default)]
     pub args: Vec<String>,
+
+    #[serde(default)]
+    pub use_options: Vec<String>,
+
+    #[serde(skip)]
+    pub options: Vec<String>,
 
     #[serde(skip)]
     pub gui_state: iced::button::State,

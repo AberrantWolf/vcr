@@ -28,7 +28,7 @@ enum GState {
 #[derive(Debug, Clone)]
 pub enum GruiMessage {
     _Start,
-    StartAction(GrunnerAction),
+    StartAction(usize, GrunnerAction),
     ActionUpdate(task_subscription::ActionProgress),
     OptionChanged(String, GrunnerOptionMessage),
 }
@@ -72,14 +72,14 @@ impl GrunnerOption {
         match self {
             GrunnerOption::Choices { choices, selected } => {
                 let mut content = Row::new().spacing(8);
-                for choice in choices.iter() {
+                for (idx, choice) in choices.iter().enumerate() {
                     // Check for unset option and then just select the first one
-                    // TODO: Include an optional default option and set that (somewhere) if it exists
+                    // TODO: Include an optional default option and set that (somewhere) if exists
                     if let None = selected {
-                        *selected = Some(choice.id);
+                        *selected = Some(idx);
                     }
                     content = content.push(iced::radio::Radio::new(
-                        choice.id,
+                        idx,
                         &choice.label,
                         selected.to_owned(),
                         GrunnerOptionMessage::ChoiceChanged,
@@ -136,7 +136,25 @@ impl Application for Grui {
         // TODO: Change messages to refer to an index in the list of options and then forward
         match message {
             GruiMessage::_Start => {}
-            GruiMessage::StartAction(act) => self.state = GState::Working(act),
+            GruiMessage::StartAction(sect_idx, mut act) => {
+                // Collect enabled options' args and set the options list from them
+                let opts: Vec<String> = act
+                    .use_options
+                    .iter()
+                    .filter_map(|opt| {
+                        // Look for the option name in the list of options
+                        // println!("SECTION IDX: {:?}", sect_idx);
+                        match self.config.sections[sect_idx].options.get(opt) {
+                            Some(gopt) => gopt.get_arg(),
+                            None => None,
+                        }
+                    })
+                    .collect();
+
+                // println!("OPTIONS: {:?}", opts);
+                act.options = opts;
+                self.state = GState::Working(act);
+            }
             GruiMessage::ActionUpdate(update) => match update {
                 task_subscription::ActionProgress::Starting => {}
                 task_subscription::ActionProgress::Continuing => {}
@@ -176,13 +194,18 @@ impl Application for Grui {
                     .config
                     .sections
                     .iter_mut()
-                    .fold(Column::new().spacing(20), |content, section| {
+                    .enumerate()
+                    .fold(Column::new().spacing(20), |content, (sect_idx, section)| {
                         // TODO: Draw a label and separator for this section
 
                         let options_gui: Element<_> = section
                             .options
                             .iter_mut()
                             .fold(Column::new().spacing(8), |column, (opt_name, opt)| {
+                                // NOTE: This clone and the one below seem to be needed in order
+                                // to know the lifetime. I'm not sure why rustc can't figure it
+                                // out, but it definitely doesn't like just cloning `opt_name`
+                                // into the enum below.
                                 let owned_name = opt_name.clone();
                                 column.push(opt.view().map(move |msg| {
                                     GruiMessage::OptionChanged(owned_name.clone(), msg)
@@ -195,9 +218,10 @@ impl Application for Grui {
                             .iter_mut()
                             .fold(Row::new().spacing(8), |content, (text, act)| {
                                 let act_clone = act.clone();
+                                // println!("SECT: {}, {}", sect_idx, text);
                                 content.push(
                                     Button::new(&mut act.gui_state, Text::new(text))
-                                        .on_press(GruiMessage::StartAction(act_clone)),
+                                        .on_press(GruiMessage::StartAction(sect_idx, act_clone)),
                                 )
                             })
                             .into();
