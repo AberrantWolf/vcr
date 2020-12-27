@@ -4,12 +4,12 @@
             "label": "Cargo",
             "options": {
                 "buildType": {"choices": [
-                    {"label": "Debug", "arg":""},
-                    {"label":"Release", "arg":"--release"}
+                    {"label": "Debug", "args":[""]},
+                    {"label":"Release", "args":["--release"]}
                 ]},
-                "runTests": {"name": "Run Tests", "value": false, "arg": "--tests"},
+                "runTests": {"name": "Run Tests", "value": false, "args": ["--tests"]},
                 
-                "moarOptions": {"name": "Some Flag", "value": true, "arg": "--a-flag"}
+                "moarOptions": {"name": "Some Flag", "value": true, "args": ["--a-flag"]}
             },
             "actions": {
                 "Build": {
@@ -29,8 +29,9 @@
             "options": {
                 "command": {
                     "choices": [
-                        {"label": "Status", "arg": "status"},
-                        {"label": "Pull", "arg": "pull"}
+                        {"label": "Status", "args": ["status"]},
+                        {"label": "Pull", "args": ["pull"]},
+                        {"label": "Add All", "args": ["add", "."]}
                     ]
                 }
             },

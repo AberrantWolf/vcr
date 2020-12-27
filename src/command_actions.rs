@@ -19,7 +19,7 @@ pub struct GrunnerChoiceType {
     #[serde(skip, default = "next_option_id")]
     pub id: usize,
     pub label: String,
-    pub arg: String,
+    pub args: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -34,32 +34,32 @@ pub enum GrunnerOption {
     Flag {
         name: String,
         value: bool,
-        arg: String,
+        args: Vec<String>,
     },
 }
 
 impl GrunnerOption {
-    pub fn get_arg(&self) -> Option<String> {
+    pub fn get_arg(&self) -> Vec<String> {
         // println!("OPTION: {:?}", self);
         match self {
             GrunnerOption::Choices { choices, selected } => {
                 if let Some(idx) = selected {
-                    let choice = &choices[*idx].arg;
-                    if choice.is_empty() {
-                        None
+                    let args = &choices[*idx].args;
+                    if args.is_empty() {
+                        vec![]
                     } else {
-                        Some(choice.into())
+                        args.clone().into()
                     }
                 } else {
-                    None
+                    vec![]
                 }
             }
             GrunnerOption::Flag {
                 name: _,
                 value,
-                arg,
-            } if *value => Some(arg.into()),
-            _ => None,
+                args,
+            } if *value => args.clone().into(),
+            _ => vec![],
         }
     }
 }

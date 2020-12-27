@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use iced::{
-    executor, Application, Button, Column, Command, Container, Element, Length, Row, Settings,
-    Subscription, Text,
+    executor, Align, Application, Button, Column, Command, Container, Element, Font, Length, Row,
+    Rule, Settings, Subscription, Text,
 };
 
 use crate::command_actions::{GrunnerConfig, GrunnerOption};
@@ -58,7 +58,7 @@ impl GrunnerOption {
                 if let GrunnerOption::Flag {
                     name: _,
                     value,
-                    arg: _,
+                    args: _,
                 } = self
                 {
                     *value = val;
@@ -68,7 +68,6 @@ impl GrunnerOption {
     }
 
     fn view(&mut self) -> Element<GrunnerOptionMessage> {
-        // TODO: Flesh out (move/add as needed)
         match self {
             GrunnerOption::Choices { choices, selected } => {
                 let mut content = Row::new().spacing(8);
@@ -90,7 +89,7 @@ impl GrunnerOption {
             GrunnerOption::Flag {
                 name,
                 value,
-                arg: _,
+                args: _,
             } => {
                 let content = iced::checkbox::Checkbox::new(
                     *value,
@@ -98,7 +97,7 @@ impl GrunnerOption {
                     GrunnerOptionMessage::FlagChanged,
                 );
                 content.into()
-            }
+            } // TODO: Input for a user to just type whatever?
         }
     }
 }
@@ -133,23 +132,18 @@ impl Application for Grui {
     }
 
     fn update(&mut self, message: GruiMessage) -> Command<GruiMessage> {
-        // TODO: Change messages to refer to an index in the list of options and then forward
         match message {
             GruiMessage::_Start => {}
             GruiMessage::StartAction(sect_idx, mut act) => {
                 // Collect enabled options' args and set the options list from them
-                let opts: Vec<String> = act
-                    .use_options
-                    .iter()
-                    .filter_map(|opt| {
-                        // Look for the option name in the list of options
-                        // println!("SECTION IDX: {:?}", sect_idx);
-                        match self.config.sections[sect_idx].options.get(opt) {
-                            Some(gopt) => gopt.get_arg(),
-                            None => None,
-                        }
-                    })
-                    .collect();
+                let mut opts: Vec<String> = vec![];
+                for opt in act.use_options.iter() {
+                    // Look for the option name in the list of options
+                    match self.config.sections[sect_idx].options.get(opt) {
+                        Some(gopt) => opts.extend(gopt.get_arg().iter().map(|o| o.clone())),
+                        None => {}
+                    }
+                }
 
                 // println!("OPTIONS: {:?}", opts);
                 act.options = opts;
@@ -196,7 +190,12 @@ impl Application for Grui {
                     .iter_mut()
                     .enumerate()
                     .fold(Column::new().spacing(20), |content, (sect_idx, section)| {
-                        // TODO: Draw a label and separator for this section
+                        let header = Row::new()
+                            .push(Rule::horizontal(0))
+                            .push(Text::new(&section.label).font(Font::Default))
+                            .push(Rule::horizontal(0))
+                            .align_items(Align::Center)
+                            .spacing(0);
 
                         let options_gui: Element<_> = section
                             .options
@@ -226,8 +225,9 @@ impl Application for Grui {
                             })
                             .into();
 
-                        content.push(options_gui).push(actions_gui)
+                        content.push(header).push(options_gui).push(actions_gui)
                     })
+                    .align_items(Align::Center)
                     .into();
 
                 sections
