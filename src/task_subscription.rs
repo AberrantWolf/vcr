@@ -91,7 +91,7 @@ where
                             ActionState::InProgress(out_reader, err_reader, async_child, action),
                         ))
                     }
-                    ActionState::InProgress(mut out_reader, mut err_reader, child, action) => {
+                    ActionState::InProgress(mut out_reader, mut err_reader, mut child, action) => {
                         let mut out_line = String::new();
                         let mut err_line = String::new();
 
@@ -100,17 +100,28 @@ where
                             read = err_reader.read_line(&mut err_line) => (read, err_line),
                         };
 
-                        // let readline = reader.read_line(&mut line).await;
-
                         match readline {
                             Ok(count_bytes) => {
                                 if count_bytes == 0 {
+                                    let child_result = child
+                                        .wait()
+                                        .await
+                                        .expect("Error waiting for child process to complete");
+
+                                    if child_result.success() {
+                                        // TODO: Play succeed sound if one is set
+                                        println!("Action succeeded!\n");
+                                    } else {
+                                        // TODO: Play fail sound if one is set
+                                        println!("Action failed!\n");
+                                    }
+
                                     println!("-----------------");
-                                    println!("Action succeeded!\n");
                                     return Some((ActionProgress::Completed, ActionState::Done));
                                 }
 
                                 print!("{}", &line);
+                                // TODO: Make a log view to display this info in the app window
 
                                 Some((
                                     ActionProgress::Continuing,

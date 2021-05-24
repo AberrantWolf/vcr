@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use iced::{
-    executor, Align, Application, Button, Column, Command, Container, Element, Font, Length, Row,
-    Rule, Settings, Subscription, Text,
+    executor, Align, Application, Button, Clipboard, Column, Command, Container, Element, Font,
+    Length, Row, Rule, Settings, Subscription, Text,
 };
 
 use crate::command_actions::{GrunnerConfig, GrunnerOption};
@@ -131,7 +131,7 @@ impl Application for Grui {
         String::from("Grunner UI")
     }
 
-    fn update(&mut self, message: GruiMessage) -> Command<GruiMessage> {
+    fn update(&mut self, message: GruiMessage, _clipboard: &mut Clipboard) -> Command<GruiMessage> {
         match message {
             GruiMessage::_Start => {}
             GruiMessage::StartAction(sect_idx, mut act) => {

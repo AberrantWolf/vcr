@@ -67,6 +67,8 @@ impl GrunnerOption {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GrunnerSection {
     pub label: String,
+
+    #[serde(default)]
     pub options: HashMap<String, GrunnerOption>,
     pub actions: HashMap<String, GrunnerAction>,
 }

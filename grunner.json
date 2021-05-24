@@ -25,6 +25,17 @@
             }
         },
         {
+            "label": "Test Succeess/Fail",
+            "actions": {
+                "Test Success": {
+                    "execute": ".\\succeed.bat"
+                },
+                "Test Fail": {
+                    "execute": ".\\fail.bat"
+                }
+            }
+        },
+        {
             "label": "Git",
             "options": {
                 "command": {
