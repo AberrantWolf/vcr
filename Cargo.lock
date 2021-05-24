@@ -1095,20 +1095,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "grunner"
-version = "0.2.0"
-dependencies = [
- "iced",
- "iced_futures",
- "iced_native",
- "serde",
- "serde_json",
- "structopt",
- "subprocess",
- "tokio",
-]
-
-[[package]]
 name = "guillotiere"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2504,6 +2490,20 @@ dependencies = [
  "idna",
  "matches",
  "percent-encoding",
+]
+
+[[package]]
+name = "vcr"
+version = "0.2.0"
+dependencies = [
+ "iced",
+ "iced_futures",
+ "iced_native",
+ "serde",
+ "serde_json",
+ "structopt",
+ "subprocess",
+ "tokio",
 ]
 
 [[package]]

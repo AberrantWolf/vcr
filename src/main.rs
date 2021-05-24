@@ -7,7 +7,7 @@ use command_actions::load_grunner_config;
 use grui::run_grui;
 
 fn main() {
-    let config = load_grunner_config("grunner.json").unwrap();
+    let config = load_grunner_config("vcr.json").unwrap();
 
     run_grui(config);
 }

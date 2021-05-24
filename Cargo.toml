@@ -1,5 +1,5 @@
 [package]
-name = "grunner"
+name = "vcr"
 version = "0.2.0"
 authors = ["AberrantWolf <orcein@gmail.com>"]
 edition = "2018"

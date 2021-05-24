@@ -9,7 +9,7 @@ use crate::command_actions::{GrunnerConfig, GrunnerOption};
 use crate::{command_actions::GrunnerAction, task_subscription};
 
 pub fn run_grui(config: GrunnerConfig) {
-    Grui::run(Settings::with_flags(config)).expect("Error running Grunner UI");
+    Grui::run(Settings::with_flags(config)).expect("Error running VCR UI");
 }
 
 #[derive(Debug)]
@@ -135,7 +135,7 @@ impl Application for Grui {
     }
 
     fn title(&self) -> String {
-        String::from("Grunner UI")
+        String::from("VCR -- The Visual Command Runner")
     }
 
     fn update(&mut self, message: GruiMessage, _clipboard: &mut Clipboard) -> Command<GruiMessage> {
