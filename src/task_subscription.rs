@@ -3,8 +3,7 @@ use std::process::Stdio;
 use iced_futures::futures;
 use tokio::{
     io::{AsyncBufReadExt, BufReader},
-    process::ChildStderr,
-    process::{Child, ChildStdout, Command},
+    process::{Child, ChildStderr, ChildStdout, Command},
 };
 
 use crate::command_actions::GrunnerAction;

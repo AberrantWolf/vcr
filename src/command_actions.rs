@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use std::cell::Cell;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
@@ -14,7 +13,7 @@ fn next_option_id() -> usize {
     })
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GrunnerChoiceType {
     #[serde(skip, default = "next_option_id")]
     pub id: usize,
@@ -22,10 +21,11 @@ pub struct GrunnerChoiceType {
     pub args: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum GrunnerOption {
     Choices {
+        name: String,
         choices: Vec<GrunnerChoiceType>,
 
         #[serde(skip)]
@@ -33,6 +33,7 @@ pub enum GrunnerOption {
     },
     Flag {
         name: String,
+        label: String,
         value: bool,
         args: Vec<String>,
     },
@@ -40,9 +41,12 @@ pub enum GrunnerOption {
 
 impl GrunnerOption {
     pub fn get_arg(&self) -> Vec<String> {
-        // println!("OPTION: {:?}", self);
         match self {
-            GrunnerOption::Choices { choices, selected } => {
+            GrunnerOption::Choices {
+                name: _,
+                choices,
+                selected,
+            } => {
                 if let Some(idx) = selected {
                     let args = &choices[*idx].args;
                     if args.is_empty() {
@@ -56,25 +60,39 @@ impl GrunnerOption {
             }
             GrunnerOption::Flag {
                 name: _,
+                label: _,
                 value,
                 args,
-            } if *value => args.clone().into(),
-            _ => vec![],
+            } => {
+                if *value {
+                    args.clone().into()
+                } else {
+                    vec![]
+                }
+            }
+        }
+    }
+
+    pub fn get_name(&self) -> &str {
+        match self {
+            GrunnerOption::Choices {
+                name,
+                choices: _,
+                selected: _,
+            } => name,
+            GrunnerOption::Flag {
+                name,
+                label: _,
+                value: _,
+                args: _,
+            } => name,
         }
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GrunnerSection {
-    pub label: String,
-
-    #[serde(default)]
-    pub options: HashMap<String, GrunnerOption>,
-    pub actions: HashMap<String, GrunnerAction>,
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GrunnerAction {
+    pub name: String,
     pub execute: String,
 
     #[serde(default)]
@@ -88,6 +106,15 @@ pub struct GrunnerAction {
 
     #[serde(skip)]
     pub gui_state: iced::button::State,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GrunnerSection {
+    pub label: String,
+
+    #[serde(default)]
+    pub options: Vec<GrunnerOption>,
+    pub actions: Vec<GrunnerAction>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

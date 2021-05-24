@@ -47,6 +47,7 @@ impl GrunnerOption {
         match message {
             GrunnerOptionMessage::ChoiceChanged(id) => {
                 if let GrunnerOption::Choices {
+                    name: _,
                     choices: _,
                     selected,
                 } = self
@@ -57,6 +58,7 @@ impl GrunnerOption {
             GrunnerOptionMessage::FlagChanged(val) => {
                 if let GrunnerOption::Flag {
                     name: _,
+                    label: _,
                     value,
                     args: _,
                 } = self
@@ -69,7 +71,11 @@ impl GrunnerOption {
 
     fn view(&mut self) -> Element<GrunnerOptionMessage> {
         match self {
-            GrunnerOption::Choices { choices, selected } => {
+            GrunnerOption::Choices {
+                name: _,
+                choices,
+                selected,
+            } => {
                 let mut content = Row::new().spacing(8);
                 for (idx, choice) in choices.iter().enumerate() {
                     // Check for unset option and then just select the first one
@@ -87,13 +93,14 @@ impl GrunnerOption {
                 content.into()
             }
             GrunnerOption::Flag {
-                name,
+                name: _,
+                label,
                 value,
                 args: _,
             } => {
                 let content = iced::checkbox::Checkbox::new(
                     *value,
-                    name.to_owned(),
+                    label.to_owned(),
                     GrunnerOptionMessage::FlagChanged,
                 );
                 content.into()
@@ -139,9 +146,26 @@ impl Application for Grui {
                 let mut opts: Vec<String> = vec![];
                 for opt in act.use_options.iter() {
                     // Look for the option name in the list of options
-                    match self.config.sections[sect_idx].options.get(opt) {
-                        Some(gopt) => opts.extend(gopt.get_arg().iter().map(|o| o.clone())),
-                        None => {}
+                    if let Some(&gopt) = self.config.sections[sect_idx]
+                        .options
+                        .iter()
+                        .filter(|opti| match opti {
+                            GrunnerOption::Choices {
+                                name,
+                                choices: _,
+                                selected: _,
+                            } => name == opt,
+                            GrunnerOption::Flag {
+                                name,
+                                label: _,
+                                value: _,
+                                args: _,
+                            } => name == opt,
+                        })
+                        .collect::<Vec<&GrunnerOption>>()
+                        .first()
+                    {
+                        opts.extend(gopt.get_arg().iter().map(|o| o.clone()))
                     }
                 }
 
@@ -157,8 +181,8 @@ impl Application for Grui {
             },
             GruiMessage::OptionChanged(name, opt_message) => {
                 'top: for sect in &mut self.config.sections {
-                    for (opt_name, opt) in &mut sect.options {
-                        if *opt_name != name {
+                    for opt in &mut sect.options {
+                        if opt.get_name() != name {
                             continue;
                         }
 
@@ -200,12 +224,12 @@ impl Application for Grui {
                         let options_gui: Element<_> = section
                             .options
                             .iter_mut()
-                            .fold(Column::new().spacing(8), |column, (opt_name, opt)| {
+                            .fold(Column::new().spacing(8), |column, opt| {
                                 // NOTE: This clone and the one below seem to be needed in order
                                 // to know the lifetime. I'm not sure why rustc can't figure it
                                 // out, but it definitely doesn't like just cloning `opt_name`
                                 // into the enum below.
-                                let owned_name = opt_name.clone();
+                                let owned_name = opt.get_name().to_owned();
                                 column.push(opt.view().map(move |msg| {
                                     GruiMessage::OptionChanged(owned_name.clone(), msg)
                                 }))
@@ -215,11 +239,11 @@ impl Application for Grui {
                         let actions_gui: Element<_> = section
                             .actions
                             .iter_mut()
-                            .fold(Row::new().spacing(8), |content, (text, act)| {
+                            .fold(Row::new().spacing(8), |content, act| {
                                 let act_clone = act.clone();
                                 // println!("SECT: {}, {}", sect_idx, text);
                                 content.push(
-                                    Button::new(&mut act.gui_state, Text::new(text))
+                                    Button::new(&mut act.gui_state, Text::new(act.name.to_owned()))
                                         .on_press(GruiMessage::StartAction(sect_idx, act_clone)),
                                 )
                             })

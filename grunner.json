@@ -2,56 +2,80 @@
     "sections":[
         {
             "label": "Cargo",
-            "options": {
-                "buildType": {"choices": [
-                    {"label": "Debug", "args":[""]},
-                    {"label":"Release", "args":["--release"]}
-                ]},
-                "runTests": {"name": "Run Tests", "value": false, "args": ["--tests"]},
-                
-                "moarOptions": {"name": "Some Flag", "value": true, "args": ["--a-flag"]}
-            },
-            "actions": {
-                "Build": {
+            "options": [
+                {
+                    "name": "buildType",
+                    "choices": [
+                        {
+                            "label": "Debug",
+                            "args":[]
+                        },
+                        {
+                            "label": "Release",
+                            "args":["--release"]
+                        }
+                    ]
+                },
+                {
+                    "name": "runTests",
+                    "label": "Run Tests",
+                    "value": false,
+                    "args": ["--tests"]
+                },
+                {
+                    "name": "moarOptions",
+                    "label": "Some Flag",
+                    "value": true,
+                    "args": ["--a-flag"]
+                }
+            ],
+            "actions": [
+                {
+                    "name": "Build",
                     "execute": "cargo",
                     "args": ["build"],
                     "use_options":["buildType", "runTests"]
                 },
-                "Run": {
+                {
+                    "name": "Run",
                     "execute": "cargo",
                     "args": ["run"],
                     "use_options": ["buildType"]
                 }
-            }
+            ]
         },
         {
             "label": "Test Succeess/Fail",
-            "actions": {
-                "Test Success": {
+            "actions": [
+                {
+                    "name": "Test Success",
                     "execute": ".\\succeed.bat"
                 },
-                "Test Fail": {
+                {
+                    "name": "Test Fail",
                     "execute": ".\\fail.bat"
                 }
-            }
+            ]
         },
         {
             "label": "Git",
-            "options": {
-                "command": {
+            "options": [
+                {
+                    "name": "command",
                     "choices": [
                         {"label": "Status", "args": ["status"]},
                         {"label": "Pull", "args": ["pull"]},
                         {"label": "Add All", "args": ["add", "."]}
                     ]
                 }
-            },
-            "actions": {
-                "Execute Git": {
+            ],
+            "actions": [
+                {
+                    "name": "Execute Git",
                     "execute": "git",
                     "use_options": ["command"]
                 }
-            }
+            ]
         }
     ]
 }
