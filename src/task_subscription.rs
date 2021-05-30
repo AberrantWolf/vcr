@@ -29,11 +29,17 @@ pub enum ActionState {
     Done,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum ActionResult {
+    Success,
+    Fail,
+}
+
 #[derive(Debug, Clone)]
 pub enum ActionProgress {
     Starting,
     Continuing,
-    Completed,
+    Completed(ActionResult),
     Error,
 }
 
@@ -107,16 +113,21 @@ where
                                         .await
                                         .expect("Error waiting for child process to complete");
 
-                                    if child_result.success() {
+                                    let result = if child_result.success() {
                                         // TODO: Play succeed sound if one is set
-                                        println!("Action succeeded!\n");
+                                        println!("Action succeeded!");
+                                        ActionResult::Success
                                     } else {
                                         // TODO: Play fail sound if one is set
-                                        println!("Action failed!\n");
-                                    }
+                                        println!("Action failed!");
+                                        ActionResult::Fail
+                                    };
 
                                     println!("-----------------");
-                                    return Some((ActionProgress::Completed, ActionState::Done));
+                                    return Some((
+                                        ActionProgress::Completed(result),
+                                        ActionState::Done,
+                                    ));
                                 }
 
                                 print!("{}", &line);

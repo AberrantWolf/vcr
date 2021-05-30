@@ -1,5 +1,5 @@
 {
-    "sections":[
+    "sections": [
         {
             "label": "Cargo",
             "options": [
@@ -8,11 +8,13 @@
                     "choices": [
                         {
                             "label": "Debug",
-                            "args":[]
+                            "args": []
                         },
                         {
                             "label": "Release",
-                            "args":["--release"]
+                            "args": [
+                                "--release"
+                            ]
                         }
                     ]
                 },
@@ -20,27 +22,41 @@
                     "name": "runTests",
                     "label": "Run Tests",
                     "value": false,
-                    "args": ["--tests"]
+                    "args": [
+                        "--tests"
+                    ]
                 },
                 {
                     "name": "moarOptions",
                     "label": "Some Flag",
                     "value": true,
-                    "args": ["--a-flag"]
+                    "args": [
+                        "--a-flag"
+                    ]
                 }
             ],
             "actions": [
                 {
                     "name": "Build",
                     "execute": "cargo",
-                    "args": ["build"],
-                    "use_options":["buildType", "runTests"]
+                    "args": [
+                        "build"
+                    ],
+                    "use_options": [
+                        "buildType",
+                        "runTests"
+                    ],
+                    "success_sound": "sounds/success_hard.ogg"
                 },
                 {
                     "name": "Run",
                     "execute": "cargo",
-                    "args": ["run"],
-                    "use_options": ["buildType"]
+                    "args": [
+                        "run"
+                    ],
+                    "use_options": [
+                        "buildType"
+                    ]
                 }
             ]
         },
@@ -49,11 +65,15 @@
             "actions": [
                 {
                     "name": "Test Success",
-                    "execute": ".\\succeed.bat"
+                    "execute": ".\\succeed.bat",
+                    "success_sound": "sounds/success_hard.ogg",
+                    "fail_sound": "sounds/fail_hard.ogg"
                 },
                 {
                     "name": "Test Fail",
-                    "execute": ".\\fail.bat"
+                    "execute": ".\\fail.bat",
+                    "success_sound": "sounds/success_hard.ogg",
+                    "fail_sound": "sounds/fail_hard.ogg"
                 }
             ]
         },
@@ -63,9 +83,25 @@
                 {
                     "name": "command",
                     "choices": [
-                        {"label": "Status", "args": ["status"]},
-                        {"label": "Pull", "args": ["pull"]},
-                        {"label": "Add All", "args": ["add", "."]}
+                        {
+                            "label": "Status",
+                            "args": [
+                                "status"
+                            ]
+                        },
+                        {
+                            "label": "Pull",
+                            "args": [
+                                "pull"
+                            ]
+                        },
+                        {
+                            "label": "Add All",
+                            "args": [
+                                "add",
+                                "."
+                            ]
+                        }
                     ]
                 }
             ],
@@ -73,7 +109,9 @@
                 {
                     "name": "Execute Git",
                     "execute": "git",
-                    "use_options": ["command"]
+                    "use_options": [
+                        "command"
+                    ]
                 }
             ]
         }

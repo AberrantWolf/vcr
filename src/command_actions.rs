@@ -101,6 +101,12 @@ pub struct GrunnerAction {
     #[serde(default)]
     pub use_options: Vec<String>,
 
+    #[serde(default)]
+    pub success_sound: Option<String>,
+
+    #[serde(default)]
+    pub fail_sound: Option<String>,
+
     #[serde(skip)]
     pub options: Vec<String>,
 
