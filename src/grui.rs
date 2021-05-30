@@ -61,6 +61,19 @@ impl ProtectedStreamHandle {
             None => {}
         }
     }
+
+    fn play_file(&self, path: &str) {
+        if let Ok(file) = File::open(path) {
+            let buf_reader = BufReader::new(file);
+            if let Ok(source) = Decoder::new(buf_reader) {
+                self.play_sound(source.convert_samples());
+            } else {
+                println!("Error decoding audio file: {}", path);
+            }
+        } else {
+            println!("Error opening audio file: {}", path);
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -246,25 +259,13 @@ impl Application for Grui {
                             task_subscription::ActionResult::Success => {
                                 // Play success sound
                                 if let Some(fname) = &state.success_sound {
-                                    if let Ok(file) = File::open(fname) {
-                                        let buf_reader = BufReader::new(file);
-                                        if let Ok(source) = Decoder::new(buf_reader) {
-                                            self.audio_stream_handle
-                                                .play_sound(source.convert_samples());
-                                        }
-                                    }
+                                    self.audio_stream_handle.play_file(fname);
                                 }
                             }
                             task_subscription::ActionResult::Fail => {
                                 // Play fail sound
                                 if let Some(fname) = &state.fail_sound {
-                                    if let Ok(file) = File::open(fname) {
-                                        let buf_reader = BufReader::new(file);
-                                        if let Ok(source) = Decoder::new(buf_reader) {
-                                            self.audio_stream_handle
-                                                .play_sound(source.convert_samples());
-                                        }
-                                    }
+                                    self.audio_stream_handle.play_file(fname);
                                 }
                             }
                         }
