@@ -1,15 +1,11 @@
-use std::fmt;
-// use std::collections::HashMap;
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::thread::JoinHandle;
+use std::sync::mpsc::Sender;
 
 use iced::{
     executor, Align, Application, Button, Clipboard, Column, Command, Container, Element, Font,
     Length, Row, Rule, Settings, Subscription, Text,
 };
 
-use rodio::{source::Source, Decoder, OutputStream, OutputStreamHandle};
+use rodio::{source::Source, Decoder, OutputStream};
 use std::fs::File;
 use std::io::BufReader;
 
@@ -20,68 +16,11 @@ pub fn run_grui(config: GrunnerConfig) {
     Grui::run(Settings::with_flags(config)).expect("Error running VCR UI");
 }
 
-#[derive(Clone)]
-struct ProtectedStreamHandle {
-    inner: Arc<Mutex<Option<OutputStreamHandle>>>,
-}
-
-impl fmt::Debug for ProtectedStreamHandle {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        let inner_state = match *self.inner.lock().unwrap() {
-            Some(_) => "OutputStreamHandle".to_string(),
-            None => "None".to_string(),
-        };
-        fmt.debug_struct("ProtectedStreamHandle")
-            .field("audio_stream_handle", &inner_state)
-            .finish()
-    }
-}
-
-impl ProtectedStreamHandle {
-    fn new() -> Self {
-        Self {
-            inner: Arc::new(Mutex::new(Option::<OutputStreamHandle>::None)),
-        }
-    }
-
-    fn set_handle(&mut self, handle: OutputStreamHandle) {
-        *self.inner.lock().unwrap() = Some(handle);
-    }
-
-    fn play_sound<S>(&self, source: S)
-    where
-        S: Source<Item = f32> + Send + 'static,
-    {
-        match *self.inner.lock().unwrap() {
-            Some(ref handle) => {
-                if let Err(_) = handle.play_raw(source) {
-                    println!("Error trying to play source");
-                }
-            }
-            None => {}
-        }
-    }
-
-    fn play_file(&self, path: &str) {
-        if let Ok(file) = File::open(path) {
-            let buf_reader = BufReader::new(file);
-            if let Ok(source) = Decoder::new(buf_reader) {
-                self.play_sound(source.convert_samples());
-            } else {
-                println!("Error decoding audio file: {}", path);
-            }
-        } else {
-            println!("Error opening audio file: {}", path);
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct Grui {
     config: GrunnerConfig,
     state: GState,
-    _audio_thread: JoinHandle<()>,
-    audio_stream_handle: ProtectedStreamHandle,
+    sender: Sender<String>,
 }
 
 #[derive(Debug)]
@@ -179,21 +118,31 @@ impl GrunnerOption {
 //------------------------------------------------------------------------------
 impl Grui {
     fn new(config: GrunnerConfig) -> Self {
-        let handle = ProtectedStreamHandle::new();
-        let mut thread_owned_handle = handle.clone();
-        let audio_thread = std::thread::spawn(move || {
+        let (sender, receiver) = std::sync::mpsc::channel::<String>();
+
+        std::thread::spawn(move || {
             let (_audio_stream, audio_stream_handle) = OutputStream::try_default().unwrap();
-            {
-                thread_owned_handle.set_handle(audio_stream_handle);
+
+            while let Ok(path) = receiver.recv() {
+                if let Ok(file) = File::open(&path) {
+                    let buf_reader = BufReader::new(file);
+                    if let Ok(source) = Decoder::new(buf_reader) {
+                        audio_stream_handle
+                            .play_raw(source.convert_samples())
+                            .expect("unable to play decoded audio");
+                    } else {
+                        println!("Error decoding audio file: {}", path);
+                    }
+                } else {
+                    println!("Error opening audio file: {}", path);
+                }
             }
-            std::thread::park();
         });
 
         Grui {
             config,
             state: GState::Idle,
-            _audio_thread: audio_thread,
-            audio_stream_handle: handle,
+            sender,
         }
     }
 }
@@ -259,13 +208,17 @@ impl Application for Grui {
                             task_subscription::ActionResult::Success => {
                                 // Play success sound
                                 if let Some(fname) = &state.success_sound {
-                                    self.audio_stream_handle.play_file(fname);
+                                    self.sender
+                                        .send(fname.clone())
+                                        .expect("Unable to send filename to audio thread");
                                 }
                             }
                             task_subscription::ActionResult::Fail => {
                                 // Play fail sound
                                 if let Some(fname) = &state.fail_sound {
-                                    self.audio_stream_handle.play_file(fname);
+                                    self.sender
+                                        .send(fname.clone())
+                                        .expect("Unable to send filename to audio thread");
                                 }
                             }
                         }
