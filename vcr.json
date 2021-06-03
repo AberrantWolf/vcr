@@ -4,11 +4,11 @@
             "label": "Cargo",
             "options": [
                 {
+                    "type": "choices",
                     "name": "buildType",
                     "choices": [
                         {
-                            "label": "Debug",
-                            "args": []
+                            "label": "Debug"
                         },
                         {
                             "label": "Release",
@@ -19,6 +19,7 @@
                     ]
                 },
                 {
+                    "type": "flag",
                     "name": "runTests",
                     "label": "Run Tests",
                     "value": false,
@@ -27,6 +28,7 @@
                     ]
                 },
                 {
+                    "type": "flag",
                     "name": "moarOptions",
                     "label": "Some Flag",
                     "value": true,
@@ -78,9 +80,44 @@
             ]
         },
         {
+            "label": "Test Variants",
+            "options": [
+                {
+                    "type": "choices",
+                    "name": "variantChoice",
+                    "choices": [
+                        {
+                            "label": "Variant A",
+                            "replacements": {
+                                "variantPath": "VarA"
+                            }
+                        },
+                        {
+                            "label": "Variant B",
+                            "replacements": {
+                                "variantPath": "VarB"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "actions": [
+                {
+                    "name": "Test Formatted Commands",
+                    "execute": "./test/scripts/{{variantPath}}/succeed.bat",
+                    "success_sound": "sounds/success_hard.ogg",
+                    "fail_sound": "sounds/fail_hard.ogg",
+                    "use_options": [
+                        "variantChoice"
+                    ]
+                }
+            ]
+        },
+        {
             "label": "Git",
             "options": [
                 {
+                    "type": "choices",
                     "name": "command",
                     "choices": [
                         {

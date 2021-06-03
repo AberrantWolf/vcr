@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::mpsc::Sender;
 
 use iced::{
@@ -169,6 +170,7 @@ impl Application for Grui {
             GruiMessage::StartAction(sect_idx, mut act) => {
                 // Collect enabled options' args and set the options list from them
                 let mut opts: Vec<String> = vec![];
+                let mut reps = HashMap::<String, String>::new();
                 for opt in act.use_options.iter() {
                     // Look for the option name in the list of options
                     if let Some(&gopt) = self.config.sections[sect_idx]
@@ -190,12 +192,17 @@ impl Application for Grui {
                         .collect::<Vec<&GrunnerOption>>()
                         .first()
                     {
-                        opts.extend(gopt.get_arg().iter().map(|o| o.clone()))
+                        opts.extend(gopt.get_arg().iter().map(|o| o.clone()));
+
+                        for (k, v) in gopt.get_replacements().iter() {
+                            reps.insert(k.clone(), v.clone());
+                        }
                     }
                 }
 
                 // println!("OPTIONS: {:?}", opts);
-                act.options = opts;
+                act.set_selected_options(opts);
+                act.apply_replacement_map(&reps);
                 self.state = GState::Working(act);
             }
             GruiMessage::ActionUpdate(update) => match update {

@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use std::cell::Cell;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
+use string_template::Template;
 
 thread_local!(static OPTION_ID: Cell<usize> = Cell::new(0));
 fn next_option_id() -> usize {
@@ -13,16 +15,19 @@ fn next_option_id() -> usize {
     })
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct GrunnerChoiceType {
     #[serde(skip, default = "next_option_id")]
     pub id: usize,
     pub label: String,
+    #[serde(default)]
     pub args: Vec<String>,
+    #[serde(default)]
+    pub replacements: HashMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(untagged)]
+#[serde(tag = "type", rename_all = "lowercase")]
 pub enum GrunnerOption {
     Choices {
         name: String,
@@ -40,7 +45,7 @@ pub enum GrunnerOption {
 }
 
 impl GrunnerOption {
-    pub fn get_arg(&self) -> Vec<String> {
+    pub fn get_choice(&self) -> GrunnerChoiceType {
         match self {
             GrunnerOption::Choices {
                 name: _,
@@ -48,29 +53,32 @@ impl GrunnerOption {
                 selected,
             } => {
                 if let Some(idx) = selected {
-                    let args = &choices[*idx].args;
-                    if args.is_empty() {
-                        vec![]
-                    } else {
-                        args.clone().into()
-                    }
+                    choices[*idx].clone()
                 } else {
-                    vec![]
+                    GrunnerChoiceType::default()
                 }
             }
             GrunnerOption::Flag {
                 name: _,
-                label: _,
+                label,
                 value,
                 args,
             } => {
                 if *value {
-                    args.clone().into()
+                    GrunnerChoiceType {
+                        label: label.clone(),
+                        args: args.clone(),
+                        ..Default::default()
+                    }
                 } else {
-                    vec![]
+                    GrunnerChoiceType::default()
                 }
             }
         }
+    }
+
+    pub fn get_arg(&self) -> Vec<String> {
+        self.get_choice().args
     }
 
     pub fn get_name(&self) -> &str {
@@ -87,6 +95,10 @@ impl GrunnerOption {
                 args: _,
             } => name,
         }
+    }
+
+    pub fn get_replacements(&self) -> HashMap<String, String> {
+        self.get_choice().replacements
     }
 }
 
@@ -112,6 +124,25 @@ pub struct GrunnerAction {
 
     #[serde(skip)]
     pub gui_state: iced::button::State,
+}
+
+impl GrunnerAction {
+    pub fn set_selected_options(&mut self, opts: Vec<String>) {
+        self.options = opts;
+    }
+
+    pub fn apply_replacement_map(&mut self, reps: &HashMap<String, String>) {
+        // Format necessary strings based on selected options
+        let fixed_map: HashMap<&str, &str> = reps
+            .iter()
+            .map(|(k, v)| (k.as_str(), v.as_str()))
+            .collect::<HashMap<&str, &str>>();
+
+        let template = Template::new(&self.execute);
+        let new_execute = template.render(&fixed_map);
+
+        self.execute = new_execute;
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
