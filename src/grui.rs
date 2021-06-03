@@ -51,65 +51,39 @@ impl GrunnerOption {
     fn update(&mut self, message: GrunnerOptionMessage) {
         match message {
             GrunnerOptionMessage::ChoiceChanged(id) => {
-                if let GrunnerOption::Choices {
-                    name: _,
-                    choices: _,
-                    selected,
-                } = self
-                {
-                    *selected = Some(id);
-                }
+                self.selected = Some(id);
             }
             GrunnerOptionMessage::FlagChanged(val) => {
-                if let GrunnerOption::Flag {
-                    name: _,
-                    label: _,
-                    value,
-                    args: _,
-                } = self
-                {
-                    *value = val;
-                }
+                self.selected = if val { Some(0) } else { None };
             }
         }
     }
 
     fn view(&mut self) -> Element<GrunnerOptionMessage> {
-        match self {
-            GrunnerOption::Choices {
-                name: _,
-                choices,
-                selected,
-            } => {
-                let mut content = Row::new().spacing(8);
-                for (idx, choice) in choices.iter().enumerate() {
-                    // Check for unset option and then just select the first one
-                    // TODO: Include an optional default option and set that (somewhere) if exists
-                    if let None = selected {
-                        *selected = Some(idx);
-                    }
-                    content = content.push(iced::radio::Radio::new(
-                        idx,
-                        &choice.label,
-                        selected.to_owned(),
-                        GrunnerOptionMessage::ChoiceChanged,
-                    ));
+        // Treat choice lists with only one entry as checkboxes
+        if self.get_choices().len() == 1 {
+            let content = iced::checkbox::Checkbox::new(
+                self.selected != None,
+                self.choices[0].label.to_owned(),
+                GrunnerOptionMessage::FlagChanged,
+            );
+            content.into()
+        } else {
+            let mut content = Row::new().spacing(8);
+            for (idx, choice) in self.choices.iter().enumerate() {
+                // Check for unset option and then just select the first one
+                // TODO: Include an optional default option and set that (somewhere) if exists
+                if let None = self.selected {
+                    self.selected = Some(idx);
                 }
-                content.into()
+                content = content.push(iced::radio::Radio::new(
+                    idx,
+                    &choice.label,
+                    self.selected.to_owned(),
+                    GrunnerOptionMessage::ChoiceChanged,
+                ));
             }
-            GrunnerOption::Flag {
-                name: _,
-                label,
-                value,
-                args: _,
-            } => {
-                let content = iced::checkbox::Checkbox::new(
-                    *value,
-                    label.to_owned(),
-                    GrunnerOptionMessage::FlagChanged,
-                );
-                content.into()
-            } // TODO: Input for a user to just type whatever?
+            content.into()
         }
     }
 }
@@ -176,19 +150,7 @@ impl Application for Grui {
                     if let Some(&gopt) = self.config.sections[sect_idx]
                         .options
                         .iter()
-                        .filter(|opti| match opti {
-                            GrunnerOption::Choices {
-                                name,
-                                choices: _,
-                                selected: _,
-                            } => name == opt,
-                            GrunnerOption::Flag {
-                                name,
-                                label: _,
-                                value: _,
-                                args: _,
-                            } => name == opt,
-                        })
+                        .filter(|opti| opti.get_name() == opt)
                         .collect::<Vec<&GrunnerOption>>()
                         .first()
                     {

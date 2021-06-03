@@ -4,7 +4,6 @@
             "label": "Cargo",
             "options": [
                 {
-                    "type": "choices",
                     "name": "buildType",
                     "choices": [
                         {
@@ -19,19 +18,23 @@
                     ]
                 },
                 {
-                    "type": "flag",
                     "name": "runTests",
-                    "label": "Run Tests",
-                    "value": false,
+                    "choices": [
+                        {
+                            "label": "Run Tests"
+                        }
+                    ],
                     "args": [
                         "--tests"
                     ]
                 },
                 {
-                    "type": "flag",
                     "name": "moarOptions",
-                    "label": "Some Flag",
-                    "value": true,
+                    "choices": [
+                        {
+                            "label": "Some Flag"
+                        }
+                    ],
                     "args": [
                         "--a-flag"
                     ]
@@ -83,7 +86,6 @@
             "label": "Test Variants",
             "options": [
                 {
-                    "type": "choices",
                     "name": "variantChoice",
                     "choices": [
                         {
@@ -117,7 +119,6 @@
             "label": "Git",
             "options": [
                 {
-                    "type": "choices",
                     "name": "command",
                     "choices": [
                         {

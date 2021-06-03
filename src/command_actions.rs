@@ -28,53 +28,25 @@ pub struct GrunnerChoiceType {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(tag = "type", rename_all = "lowercase")]
-pub enum GrunnerOption {
-    Choices {
-        name: String,
-        choices: Vec<GrunnerChoiceType>,
+pub struct GrunnerOption {
+    pub(crate) name: String,
+    pub(crate) choices: Vec<GrunnerChoiceType>,
 
-        #[serde(skip)]
-        selected: Option<usize>,
-    },
-    Flag {
-        name: String,
-        label: String,
-        value: bool,
-        args: Vec<String>,
-    },
+    #[serde(skip)]
+    pub(crate) selected: Option<usize>,
 }
 
 impl GrunnerOption {
     pub fn get_choice(&self) -> GrunnerChoiceType {
-        match self {
-            GrunnerOption::Choices {
-                name: _,
-                choices,
-                selected,
-            } => {
-                if let Some(idx) = selected {
-                    choices[*idx].clone()
-                } else {
-                    GrunnerChoiceType::default()
-                }
-            }
-            GrunnerOption::Flag {
-                name: _,
-                label,
-                value,
-                args,
-            } => {
-                if *value {
-                    GrunnerChoiceType {
-                        label: label.clone(),
-                        args: args.clone(),
-                        ..Default::default()
-                    }
-                } else {
-                    GrunnerChoiceType::default()
-                }
-            }
+        if let Some(idx) = self.selected {
+            self.choices[idx].clone()
+        } else {
+            GrunnerChoiceType::default()
         }
+    }
+
+    pub fn get_choices(&self) -> &Vec<GrunnerChoiceType> {
+        &self.choices
     }
 
     pub fn get_arg(&self) -> Vec<String> {
@@ -82,19 +54,7 @@ impl GrunnerOption {
     }
 
     pub fn get_name(&self) -> &str {
-        match self {
-            GrunnerOption::Choices {
-                name,
-                choices: _,
-                selected: _,
-            } => name,
-            GrunnerOption::Flag {
-                name,
-                label: _,
-                value: _,
-                args: _,
-            } => name,
-        }
+        self.name.as_str()
     }
 
     pub fn get_replacements(&self) -> HashMap<String, String> {
