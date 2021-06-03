@@ -65,13 +65,13 @@
             "actions": [
                 {
                     "name": "Test Success",
-                    "execute": ".\\succeed.bat",
+                    "execute": "./test/scripts/succeed.bat",
                     "success_sound": "sounds/success_hard.ogg",
                     "fail_sound": "sounds/fail_hard.ogg"
                 },
                 {
                     "name": "Test Fail",
-                    "execute": ".\\fail.bat",
+                    "execute": "./test/scripts/fail.bat",
                     "success_sound": "sounds/success_hard.ogg",
                     "fail_sound": "sounds/fail_hard.ogg"
                 }
