@@ -102,6 +102,12 @@ impl GrunnerAction {
         let new_execute = template.render(&fixed_map);
 
         self.execute = new_execute;
+
+        for arg in self.args.iter_mut() {
+            let arg_template = Template::new(arg);
+            let new_arg = arg_template.render(&fixed_map);
+            *arg = new_arg;
+        }
     }
 }
 

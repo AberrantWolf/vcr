@@ -91,13 +91,15 @@
                         {
                             "label": "Variant A",
                             "replacements": {
-                                "variantPath": "VarA"
+                                "variantPath": "VarA",
+                                "someText": "...for variant A"
                             }
                         },
                         {
                             "label": "Variant B",
                             "replacements": {
-                                "variantPath": "VarB"
+                                "variantPath": "VarB",
+                                "someText": "...for variant B"
                             }
                         }
                     ]
@@ -106,7 +108,10 @@
             "actions": [
                 {
                     "name": "Test Formatted Commands",
-                    "execute": "./test/scripts/{{variantPath}}/succeed.bat",
+                    "execute": "./test/scripts/{{variantPath}}/run.bat",
+                    "args": [
+                        "Replacement: {{someText}}"
+                    ],
                     "success_sound": "sounds/success_hard.ogg",
                     "fail_sound": "sounds/fail_hard.ogg",
                     "use_options": [
